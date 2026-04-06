@@ -1,0 +1,13 @@
+{
+  "profile_id": "self-test-pass",
+  "name": "Codex Control Self Test Pass",
+  "checks": [
+    {
+      "id": "intentional_success",
+      "title": "Intentional Success",
+      "required": true,
+      "workdir": ".",
+      "command": ["powershell", "-NoProfile", "-Command", "Write-Output 'intentional success'; exit 0"]
+    }
+  ]
+}

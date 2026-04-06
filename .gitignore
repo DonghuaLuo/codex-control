@@ -1,0 +1,11 @@
+runs/
+generated-tasks/
+active-run.json
+task-registry.json
+*.stdout.log
+*.stderr.log
+*.jsonl
+*.last.txt
+*.close-run.json
+.DS_Store
+Thumbs.db

@@ -1,0 +1,28 @@
+{
+  "tasks": [
+    {
+      "id": "analyze-request",
+      "title": "Analyze Request",
+      "description": "Analyze the request and lock the execution boundary.",
+      "required": true,
+      "owner_hint": "main-agent"
+    },
+    {
+      "id": "implement-workstream",
+      "title": "Implement Workstream",
+      "description": "Implement the main code and script changes required by the request.",
+      "required": true,
+      "owner_hint": "worker-agent",
+      "depends_on": ["analyze-request"],
+      "parallel_group": "implementation"
+    },
+    {
+      "id": "verify-and-fix",
+      "title": "Verify And Fix",
+      "description": "Run verification, then fix and retest until checks pass or an external blocker is recorded.",
+      "required": true,
+      "owner_hint": "main-agent",
+      "depends_on": ["implement-workstream"]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "profile_id": "self-test-fail",
+  "name": "Codex Control Self Test Fail",
+  "checks": [
+    {
+      "id": "intentional_failure",
+      "title": "Intentional Failure",
+      "required": true,
+      "workdir": ".",
+      "command": ["powershell", "-NoProfile", "-Command", "Write-Error 'intentional failure'; exit 1"]
+    }
+  ]
+}

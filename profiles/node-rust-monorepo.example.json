@@ -1,0 +1,34 @@
+{
+  "profile_id": "node-rust-monorepo-example",
+  "name": "Node + Rust Monorepo Example",
+  "checks": [
+    {
+      "id": "frontend_build",
+      "title": "Frontend Build",
+      "required": true,
+      "workdir": ".",
+      "command": ["pnpm", "build"]
+    },
+    {
+      "id": "frontend_test",
+      "title": "Frontend Test",
+      "required": false,
+      "workdir": ".",
+      "command": ["pnpm", "test"]
+    },
+    {
+      "id": "rust_check",
+      "title": "Rust Check",
+      "required": true,
+      "workdir": "src-tauri",
+      "command": ["cargo", "check"]
+    },
+    {
+      "id": "rust_test",
+      "title": "Rust Test",
+      "required": false,
+      "workdir": "src-tauri",
+      "command": ["cargo", "test"]
+    }
+  ]
+}

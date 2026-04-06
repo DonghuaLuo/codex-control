@@ -1,0 +1,18 @@
+{
+  "profile_id": "default",
+  "name": "Starter Profile (Customize Me)",
+  "checks": [
+    {
+      "id": "customize_profile",
+      "title": "Customize Verification Profile",
+      "required": true,
+      "workdir": ".",
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "Write-Error 'Edit profiles/default.json or pass -Profile with real verification commands before using codex-control on a real repository.'; exit 1"
+      ]
+    }
+  ]
+}

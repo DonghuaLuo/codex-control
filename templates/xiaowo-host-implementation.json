@@ -1,0 +1,35 @@
+{
+  "tasks": [
+    {
+      "id": "main-host-entry",
+      "title": "Main Host Entry",
+      "description": "Consolidate the main app host entry and remove direct low-level Tauri access from business code.",
+      "required": true,
+      "owner_hint": "worker-agent"
+    },
+    {
+      "id": "plugin-host-contract",
+      "title": "Plugin Host Contract",
+      "description": "Define and maintain the plugin host contract and parity coverage.",
+      "required": true,
+      "owner_hint": "main-agent"
+    },
+    {
+      "id": "plugin-host-simulator",
+      "title": "Plugin Host Simulator",
+      "description": "Implement and wire the plugin browser-side host simulator.",
+      "required": true,
+      "owner_hint": "worker-agent",
+      "depends_on": ["plugin-host-contract"],
+      "parallel_group": "plugin"
+    },
+    {
+      "id": "real-host-validation",
+      "title": "Real Host Validation",
+      "description": "Validate the real host path after implementation and fix remaining drift.",
+      "required": true,
+      "owner_hint": "main-agent",
+      "depends_on": ["main-host-entry", "plugin-host-simulator"]
+    }
+  ]
+}

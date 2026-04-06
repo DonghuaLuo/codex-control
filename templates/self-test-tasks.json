@@ -1,0 +1,11 @@
+{
+  "tasks": [
+    {
+      "id": "controller-self-test",
+      "title": "Controller Self Test",
+      "description": "Verify the controller failure, rework, reverify, blocker and finish-gate paths.",
+      "required": true,
+      "owner_hint": "main-agent"
+    }
+  ]
+}

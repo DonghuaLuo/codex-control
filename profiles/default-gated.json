@@ -1,0 +1,18 @@
+{
+  "profile_id": "default-gated",
+  "name": "Starter Profile (Gated Environment)",
+  "checks": [
+    {
+      "id": "customize_profile",
+      "title": "Customize Verification Profile",
+      "required": true,
+      "workdir": ".",
+      "command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "Write-Error 'Edit profiles/default-gated.json or pass -Profile with real verification commands for your gated environment before using codex-control on a real repository.'; exit 1"
+      ]
+    }
+  ]
+}
