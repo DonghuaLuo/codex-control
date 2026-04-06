@@ -1,44 +1,80 @@
 # codex-control
 
-A gated control loop for Codex CLI that keeps planning, implementing, verifying, reopening failures, and retrying until the finish gate passes.
+![License](https://img.shields.io/github/license/DonghuaLuo/codex-control)
+![Release](https://img.shields.io/github/v/release/DonghuaLuo/codex-control)
+![PowerShell](https://img.shields.io/badge/runtime-PowerShell-5391FE)
 
-`codex-control` 是一个给 Codex CLI 用的外部强制闭环控制器。它把“开工一次就停”的单次调用，变成一个可追踪、可返工、可验收的任务执行循环。
+`codex-control` is a gated control loop for Codex CLI.
 
-## What It Does
+It turns one-shot agent execution into a persistent run with planning, verification, reopen-on-failure, resume-by-task-name, and finish-gate enforcement.
 
-- 把一次用户请求落成一个 run，并持久化状态、任务、assignment、failure、agent output。
-- 可以先自动拆任务，再驱动 Codex CLI 执行实现。
-- 在每一轮后自动执行验证命令。
-- 验证失败时自动开 failure，要求继续修复并重新验证。
-- 只有当 finish gate 满足时才允许结束 run。
-- 支持外部阻塞记录、解除阻塞、按任务名续跑、查看历史和输出。
+中文说明见 [README.zh-CN.md](./README.zh-CN.md)。
 
-## Why This Exists
+## Why It Exists
 
-普通的 CLI agent 很容易停在这些中间态：
+Raw CLI agent sessions often stop in the worst possible place:
 
-- 代码改了一半
-- 任务做了但没验证
-- 验证失败了但没有持续返工
-- 没有结构化 run 历史，后续很难 resume
+- code changed, but not verified
+- verification failed, but nobody reopened the work
+- there is no durable run history to resume from
+- the task "feels done", but the repo is still not actually green
 
-`codex-control` 的目标是把这些中间态显式化，并强制进入：
+`codex-control` fixes that by forcing a loop:
 
 `plan -> implement -> verify -> fix -> reverify -> finish-gate`
+
+No green gate, no finish. That's the whole game.
+
+## Core Features
+
+- Persistent run state with task records, assignments, failures, artifacts, and agent outputs
+- Optional automatic task planning before execution
+- Verification profiles that define the real checks required for completion
+- Automatic reopening when required checks fail
+- External blocker tracking and unblock flow
+- Resume-by-task-name workflow for long-running workstreams
+- Self-tests for planner flow, wrapper flow, orchestration flow, and gate logic
+
+## How It Works
+
+Every run has a state file and a finite-state workflow.
+
+```text
+PLANNING
+  -> IMPLEMENTING
+  -> VERIFYING
+  -> FIXING
+  -> REVERIFYING
+  -> READY_TO_FINISH
+  -> FINISHED
+```
+
+The finish gate only passes when all of these are true:
+
+- all required tasks are done
+- all required tasks are marked verified
+- all required checks pass
+- no open failures remain
+- no external blockers remain
+- run status is `READY_TO_FINISH` or `FINISHED`
 
 ## Repository Layout
 
 ```text
 .
-├─ cc.ps1                     # Main entrypoint
-├─ cc.cmd                     # Windows wrapper
-├─ profiles/                  # Verification profiles
-├─ schemas/                   # JSON schemas used by planning
-├─ scripts/                   # Controller implementation
-└─ templates/                 # Task templates
+├─ cc.ps1
+├─ cc.cmd
+├─ profiles/
+├─ schemas/
+├─ scripts/
+├─ templates/
+├─ CHANGELOG.md
+├─ CONTRIBUTING.md
+├─ README.md
+└─ README.zh-CN.md
 ```
 
-运行时产物不会进入版本库：
+Runtime data is intentionally excluded from git:
 
 - `runs/`
 - `generated-tasks/`
@@ -47,20 +83,23 @@ A gated control loop for Codex CLI that keeps planning, implementing, verifying,
 
 ## Prerequisites
 
-- Windows PowerShell 5.1+ 或 PowerShell 7
-- 已安装并可直接调用的 `codex` CLI
-- 可选：如果你自己在用 RTK，也可以把命令包装为 `rtk codex`
+- Windows PowerShell 5.1+ or PowerShell 7
+- `codex` available on PATH
+- optional: `rtk`, if you want to wrap Codex calls with RTK
 
-## Repo Root Resolution
+## Repository Root Resolution
 
-`codex-control` 既可以独立放成一个仓库，也可以作为子目录嵌入你的业务仓库。
+`codex-control` works in two layouts:
 
-默认规则：
+1. standalone repository
+2. subdirectory inside another repository
 
-- 如果 `codex-control` 目录本身包含 `.git`，它会把当前目录当成目标仓库根目录。
-- 否则，它会把父目录当成目标仓库根目录。
+Default behavior:
 
-你也可以显式指定：
+- if the `codex-control` directory itself contains `.git`, it is treated as the target repo root
+- otherwise, its parent directory is treated as the target repo root
+
+You can override this explicitly:
 
 ```powershell
 $env:CODEX_CONTROL_REPO_ROOT = "D:\path\to\your-repo"
@@ -68,27 +107,29 @@ $env:CODEX_CONTROL_REPO_ROOT = "D:\path\to\your-repo"
 
 ## Quick Start
 
-### 1. Clone or copy into your repo
+### 1. Clone or copy it into your workflow
 
-独立克隆或作为子目录放进你的项目都可以。
+You can use `codex-control` as its own repository or copy it into an existing project.
 
-### 2. Customize the default profile
+### 2. Create a real verification profile
 
-仓库自带的 [`profiles/default.json`](./profiles/default.json) 会故意失败，提醒你先配置真实验证命令。
+The default profile deliberately fails until you replace it with real checks.
 
-如果你的项目是前端 + Rust 单仓，可以从这个示例开始：
+Starter files:
 
+- [`profiles/default.json`](./profiles/default.json)
+- [`profiles/default-gated.json`](./profiles/default-gated.json)
 - [`profiles/node-rust-monorepo.example.json`](./profiles/node-rust-monorepo.example.json)
 
-最常见的做法是复制一份：
+Example:
 
 ```powershell
 Copy-Item .\profiles\node-rust-monorepo.example.json .\profiles\my-project.json
 ```
 
-然后把里面的 `command` / `workdir` 改成你的真实校验链。
+Then edit the `workdir` and `command` fields to match your real repository.
 
-### 3. Run a task
+### 3. Start a gated run
 
 ```powershell
 .\cc.ps1 run `
@@ -108,7 +149,7 @@ Copy-Item .\profiles\node-rust-monorepo.example.json .\profiles\my-project.json
 .\cc.ps1 outputs
 ```
 
-### 5. Resume by task name
+### 5. Resume the same workstream later
 
 ```powershell
 .\cc.ps1 resume `
@@ -121,7 +162,7 @@ Copy-Item .\profiles\node-rust-monorepo.example.json .\profiles\my-project.json
 
 ## Main Commands
 
-### Start a new gated run
+### Run
 
 ```powershell
 .\cc.ps1 run `
@@ -132,35 +173,42 @@ Copy-Item .\profiles\node-rust-monorepo.example.json .\profiles\my-project.json
   -Force
 ```
 
-### Generate a plan only
+### Plan only
 
 ```powershell
 .\cc.ps1 plan `
   -Objective "your objective" `
-  -Prompt "analyze this request and split it into tasks"
+  -Prompt "Analyze this request and split it into execution-ready tasks."
 ```
 
-### Show run status
+### Status
 
 ```powershell
 .\cc.ps1 status
 .\cc.ps1 status -Detailed
 ```
 
-### Show task history
+### Task history
 
 ```powershell
 .\cc.ps1 task-history -TaskName "your-task-name"
 ```
 
-### Block / unblock external dependencies
+### Assignments and outputs
+
+```powershell
+.\cc.ps1 assignments
+.\cc.ps1 outputs
+```
+
+### External blockers
 
 ```powershell
 .\cc.ps1 block -Reason "Need external credential"
 .\cc.ps1 unblock -Reason "Credential has been provided"
 ```
 
-### Run self-tests
+### Self-tests
 
 ```powershell
 .\cc.ps1 self-test
@@ -169,11 +217,9 @@ Copy-Item .\profiles\node-rust-monorepo.example.json .\profiles\my-project.json
 .\cc.ps1 orchestration-self-test
 ```
 
-## Profile Format
+## Verification Profile Format
 
-A profile is a JSON file that defines the required verification checks for the finish gate.
-
-Example:
+A profile defines the checks that the finish gate must respect.
 
 ```json
 {
@@ -198,28 +244,37 @@ Example:
 }
 ```
 
-字段说明：
+Field reference:
 
-- `id`: 稳定 check 标识
-- `title`: 展示名称
-- `required`: 是否参与 finish gate
-- `workdir`: 相对目标仓库根目录的工作目录
-- `command`: 要执行的命令数组
+- `id`: stable check identifier
+- `title`: human-readable name
+- `required`: whether the check participates in the finish gate
+- `workdir`: working directory relative to the target repository root
+- `command`: command array executed by the controller
 
-## How The Gate Works
+## Task Template Format
 
-finish gate 通过，必须同时满足：
+Task templates shape the run before verification starts.
 
-- 所有 required tasks 都完成
-- 所有 required tasks 都标记为 verified
-- 所有 required checks 都通过
-- 没有 open failures
-- 没有 open external blockers
-- run status 处于 `READY_TO_FINISH` 或 `FINISHED`
+Included templates:
 
-## Optional RTK Usage
+- [`templates/default-tasks.json`](./templates/default-tasks.json)
+- [`templates/self-test-tasks.json`](./templates/self-test-tasks.json)
+- [`templates/desktop-plugin-host.example.json`](./templates/desktop-plugin-host.example.json)
 
-如果你在自己的环境里使用 RTK，可以这样调用：
+Each task can define:
+
+- `id`
+- `title`
+- `description`
+- `required`
+- `owner_hint`
+- `depends_on`
+- `parallel_group`
+
+## RTK Usage
+
+If you use RTK in your own environment, you can point Codex and planner execution at `rtk`:
 
 ```powershell
 .\cc.ps1 run `
@@ -232,11 +287,18 @@ finish gate 通过，必须同时满足：
   -Force
 ```
 
+## Documentation
+
+- [README.md](./README.md), English overview
+- [README.zh-CN.md](./README.zh-CN.md), 中文说明和使用指南
+- [CONTRIBUTING.md](./CONTRIBUTING.md), contribution and local testing notes
+- [CHANGELOG.md](./CHANGELOG.md), release history
+
 ## Notes
 
-- 这个仓库只提供控制器本体，不包含你的业务校验脚本。
-- 你应该根据自己的项目，把 profile 里的验证命令替换成真实的 `pnpm build`、`cargo check`、`pytest`、`go test` 等。
-- 默认 starter profile 会失败，这是有意设计，用来避免“没接入真实校验也误以为已经接好”。
+- This repository ships the controller, not your project-specific verification scripts.
+- You are expected to replace the starter profile with your own real checks.
+- The default starter profile fails on purpose, so you do not accidentally think verification is wired up when it is not.
 
 ## License
 

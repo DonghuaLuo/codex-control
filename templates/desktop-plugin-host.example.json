@@ -3,7 +3,7 @@
     {
       "id": "main-host-entry",
       "title": "Main Host Entry",
-      "description": "Consolidate the main app host entry and remove direct low-level Tauri access from business code.",
+      "description": "Consolidate the desktop host entry and remove direct low-level runtime access from business code.",
       "required": true,
       "owner_hint": "worker-agent"
     },
