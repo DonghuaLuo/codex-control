@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.1 - 2026-04-06
+
+Collaboration and repository hygiene update.
+
+### Added
+
+- GitHub issue forms for bugs, feature requests, and usage questions
+- Pull request template and CODEOWNERS
+- `SECURITY.md` and `CODE_OF_CONDUCT.md`
+- Documentation links for collaboration and security policies
+
 ## v0.1.0 - 2026-04-06
 
 Initial public release.
