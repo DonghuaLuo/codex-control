@@ -274,3 +274,10 @@ profile 决定 finish gate 要看哪些检查项。
 - 默认 starter profile 会失败，这是为了防止你误以为已经接好了真实验证链
 
 英文首页见 [README.md](./README.md)。
+
+协作文档还包括：
+
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
+- [CHANGELOG.md](./CHANGELOG.md)
+- [SECURITY.md](./SECURITY.md)
+- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)

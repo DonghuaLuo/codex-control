@@ -1,0 +1,58 @@
+name: Bug report
+description: Report something broken in codex-control
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug.
+
+        Please include the exact command, the profile or template involved, and what you expected to happen.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One short sentence about the bug
+      placeholder: cc.ps1 run stops before the finish gate passes
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Tell us exactly how to reproduce it
+      placeholder: |
+        1. Run ...
+        2. Use profile ...
+        3. See error ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: The controller should reopen failures and continue the loop.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: It exited after loop 1 even though verify failed.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output or logs
+      description: Paste the most useful output, not an entire unrelated transcript
+      render: powershell
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, PowerShell version, and Codex CLI version if known
+      placeholder: Windows 11, PowerShell 7.5, Codex CLI ...
+

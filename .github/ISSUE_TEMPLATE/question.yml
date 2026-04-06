@@ -1,0 +1,24 @@
+name: Usage question
+description: Ask how to configure or use codex-control
+title: "[Question] "
+labels:
+  - question
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      placeholder: How should I structure profiles for a Python + Rust repo?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Relevant context
+      description: Show the command, profile, template, or repo shape involved
+      placeholder: |
+        I am using:
+        - profile ...
+        - command ...
+        - expected workflow ...
+

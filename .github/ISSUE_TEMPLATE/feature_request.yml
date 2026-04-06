@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose a new workflow, gate behavior, or collaboration feature
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests are most useful when they describe the real workflow problem first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      placeholder: |
+        I need to resume a run across multiple repos, but the current state model only tracks one repo root.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed solution
+      placeholder: Add multi-repo run metadata and resolve workdirs per assignment.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: I tried using separate runs, but it breaks cross-repo verification.
+  - type: textarea
+    id: context
+    attributes:
+      label: Extra context
+      placeholder: Links, examples, rough APIs, or related issues
+

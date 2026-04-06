@@ -293,6 +293,8 @@ If you use RTK in your own environment, you can point Codex and planner executio
 - [README.zh-CN.md](./README.zh-CN.md), 中文说明和使用指南
 - [CONTRIBUTING.md](./CONTRIBUTING.md), contribution and local testing notes
 - [CHANGELOG.md](./CHANGELOG.md), release history
+- [SECURITY.md](./SECURITY.md), private vulnerability reporting
+- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md), collaboration expectations
 
 ## Notes
 
